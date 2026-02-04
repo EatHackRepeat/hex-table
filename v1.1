@@ -1,0 +1,250 @@
+//Hex editor //Hex editor Version 1.1
+//Phil Partridge 2024
+
+#include <conio.h>
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <windows.h>
+#include <winUser.h>
+
+using namespace std;
+
+void gotoxy(int, int);//declare a function called gotoxy
+void clrscr(void);    //declare clear screen function
+void textcolor(int);  //declare text colour function
+void print(void);     //function to update console screen
+void showcursor(bool);//turns cursor on/off
+
+char key;
+int update = 0;
+int done = 0;
+char cfilename[100];
+
+void print()
+{
+    int i = 0, x, y;
+
+    textcolor(15);
+    clrscr();
+    gotoxy(0, 2);
+    _cprintf(
+        " File Size:                           Current Offset:                           \n"
+        "   Sectors:                          Current Pointer:                           \n"
+        " Hex:       Int:      Bin:              Current Byte:                           \n");
+
+
+    gotoxy(0, 0);
+    textcolor(10);
+    cout << "[Editing: " << cfilename << "]";
+}//end of paint function
+
+
+int main(void)
+{
+    update = 1;//do we update screen?
+
+    showcursor(false);
+    sprintf_s(cfilename, "nofile");
+    print();
+
+    while (!done)//display loop
+    {
+        if (update == 1)//refresh screen
+        {
+            update = 0;
+            print();
+        }
+        key = _getch();//get keyboard input
+
+        if (key == VK_ESCAPE) done = 1;//exit program
+
+        if (key == 59)//F1 load file
+        {
+            textcolor(12);
+            gotoxy(1, 25);
+            _cprintf("Open file > ");
+        }
+
+
+        textcolor(14);
+        gotoxy(1, 25);
+        _cprintf("%d", key);
+
+    }
+    textcolor(15);
+    clrscr();
+    return 0;
+}//end of main
+
+void textcolor(int c)
+{
+    HANDLE  hConsole;
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, c);
+}
+
+void gotoxy(int x, int y)         //define gotoxy function
+{
+    static HANDLE hStdout = NULL;
+    COORD coord;
+
+    coord.X = x;
+    coord.Y = y;
+    if (!hStdout) { hStdout = GetStdHandle(STD_OUTPUT_HANDLE); }
+    SetConsoleCursorPosition(hStdout, coord);
+}
+
+void clrscr(void)
+{
+    static HANDLE hStdout = NULL;
+    static CONSOLE_SCREEN_BUFFER_INFO csbi;
+    const COORD startCoords = { 0,0 };
+    DWORD dummy;
+
+    if (!hStdout)
+    {
+        hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+        GetConsoleScreenBufferInfo(hStdout, &csbi);
+    }
+    FillConsoleOutputCharacter(hStdout, ' ', csbi.dwSize.X * csbi.dwSize.Y, startCoords, &dummy);
+    gotoxy(0, 0);
+}
+
+void showcursor(bool showFlag)
+{
+    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    CONSOLE_CURSOR_INFO     cursorInfo;
+
+    GetConsoleCursorInfo(out, &cursorInfo);
+    cursorInfo.bVisible = showFlag;// set the cursor visibility
+    SetConsoleCursorInfo(out, &cursorInfo);
+}
+
+ers
+//Phil Partridge 2024
+
+#include <conio.h>
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <windows.h>
+#include <winUser.h>
+
+using namespace std;
+
+void gotoxy(int, int);//declare a function called gotoxy
+void clrscr(void);    //declare clear screen function
+void textcolor(int);  //declare text colour function
+void print(void);     //function to update console screen
+void showcursor(bool);//turns cursor on/off
+
+char key;
+int update = 0;
+int done = 0;
+char cfilename[100];
+
+void print()
+{
+    int i = 0, x, y;
+
+    textcolor(15);
+    clrscr();
+    gotoxy(0, 2);
+    _cprintf(
+        " File Size:                           Current Offset:                           \n"
+        "   Sectors:                          Current Pointer:                           \n"
+        " Hex:       Int:      Bin:              Current Byte:                           \n");
+
+
+    gotoxy(0, 0);
+    textcolor(10);
+    cout << "[Editing: " << cfilename << "]";
+}//end of paint function
+
+
+int main(void)
+{
+    update = 1;//do we update screen?
+
+    showcursor(false);
+    sprintf_s(cfilename, "nofile");
+    print();
+
+    while (!done)//display loop
+    {
+        if (update == 1)//refresh screen
+        {
+            update = 0;
+            print();
+        }
+        key = _getch();//get keyboard input
+
+        if (key == VK_ESCAPE) done = 1;//exit program
+
+        if (key == 59)//F1 load file
+        {
+            textcolor(12);
+            gotoxy(1, 25);
+            _cprintf("Open file > ");
+        }
+
+
+        textcolor(14);
+        gotoxy(1, 25);
+        _cprintf("%d", key);
+
+    }
+    textcolor(15);
+    clrscr();
+    return 0;
+}//end of main
+
+void textcolor(int c)
+{
+    HANDLE  hConsole;
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, c);
+}
+
+void gotoxy(int x, int y)         //define gotoxy function
+{
+    static HANDLE hStdout = NULL;
+    COORD coord;
+
+    coord.X = x;
+    coord.Y = y;
+    if (!hStdout) { hStdout = GetStdHandle(STD_OUTPUT_HANDLE); }
+    SetConsoleCursorPosition(hStdout, coord);
+}
+
+void clrscr(void)
+{
+    static HANDLE hStdout = NULL;
+    static CONSOLE_SCREEN_BUFFER_INFO csbi;
+    const COORD startCoords = { 0,0 };
+    DWORD dummy;
+
+    if (!hStdout)
+    {
+        hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+        GetConsoleScreenBufferInfo(hStdout, &csbi);
+    }
+    FillConsoleOutputCharacter(hStdout, ' ', csbi.dwSize.X * csbi.dwSize.Y, startCoords, &dummy);
+    gotoxy(0, 0);
+}
+
+void showcursor(bool showFlag)
+{
+    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    CONSOLE_CURSOR_INFO     cursorInfo;
+
+    GetConsoleCursorInfo(out, &cursorInfo);
+    cursorInfo.bVisible = showFlag;// set the cursor visibility
+    SetConsoleCursorInfo(out, &cursorInfo);
+}
+
