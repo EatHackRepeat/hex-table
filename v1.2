@@ -1,0 +1,286 @@
+//Hex editor
+//Phil Partridge 2024
+
+#include <conio.h>
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <windows.h>
+#include <winUser.h>
+
+using namespace std;
+
+void gotoxy(int, int);//function declaration: gotoxy
+void clrscr(void);    //function declaration: clear screen 
+void textcolor(int);  //function declaration: text colour 
+void print(void);     //function declaration: update console screen
+void showcursor(bool);//turns cursor 1/0
+unsigned long getlen(void);//function declaration: obtain size of a file in bytes
+
+char key;
+int x = 12, y = 9;
+int update = 0;
+int done = 0;
+char cfilename[100];//name of file to open
+FILE* file = NULL;
+long offset = 0, pointer = 0;
+unsigned char buf[256];//buffer in memory to save file data
+unsigned long size1 = 0;//size of the file in bytes
+
+void print()
+{
+    int i = 0, x = 0, y = 0;
+
+    textcolor(18);
+    clrscr();
+    gotoxy(0, 2);
+    _cprintf(
+        "  File Size:                           Current Offset:                           \n"
+        "    Sectors:                          Current Pointer:                           \n"
+        "  Hex:       Int:      Bin:              Current Byte:                           \n"
+        "\n"
+        "         00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F        0123456789ABCDEF\n"
+        "   0000:                                                       0\n"
+        "   0010:                                                       1\n"
+        "   0020:                                                       2\n"
+        "   0030:                                                       3\n"
+        "   0040:                                                       4\n"
+        "   0050:                                                       5\n"
+        "   0060:                                                       6\n"
+        "   0070:                                                       7\n"
+        "   0080:                                                       8\n"
+        "   0090:                                                       9\n"
+        "   00A0:                                                       A\n"
+        "   00B0:                                                       B\n"
+        "   00C0:                                                       C\n"
+        "   00D0:                                                       D\n"
+        "   00E0:                                                       E\n"
+        "   00F0:                                                       F\n");
+    // this is the output screen, when program loaded with data program will print to here. 
+
+    gotoxy(0, 0);
+    textcolor(10);
+    cout << "[Editing: " << cfilename << "]";
+
+    if (file != NULL)//did we find the file? did we? who knows?!!
+    {
+        gotoxy(0, 0);
+        textcolor(10);
+        cout << "[Editing: " << cfilename << "]";
+        memset(buf, 0, 256);//clear the buffer
+        offset = offset;
+        //print the file size in bytes
+        textcolor(10);
+        gotoxy(12, 2);
+        printf("%d Bytes", size1);
+
+        gotoxy(54, 2);
+        printf("%d", offset);
+
+        gotoxy(54, 3);
+        printf("%d", pointer);
+
+        gotoxy(54, 4);
+        printf("%d", offset + pointer);
+
+        fseek(file, offset, SEEK_SET);
+        fread(buf, 1, 256, file);
+
+
+        //print hex dump
+        i = 0;
+        for (y = 7; y < 23; y++)//print hex dump
+        {
+            for (x = 9; x < 55; x += 3)
+            {
+                gotoxy(x, y);
+                textcolor(192);
+                _cprintf("%0.2x", buf[i]);
+                i++;
+            }
+        }
+
+        //print ASCII dump
+        i = 0;
+        for (y = 7; y < 23; y++)//print ASCII dump
+        {
+            for (x = 64; x < 80; x ++)
+            {
+                gotoxy(x, y);
+                textcolor(176);
+                if (buf[i] <= 32 || buf[i] == 0)
+                {
+                    _cprintf(".");
+                }
+                else
+                {
+                    _cprintf("%c", buf[i]);
+                }
+
+                i++;
+            }
+        }
+    }
+    //gotoxy(x, y);
+    //textcolor(192);
+    //cout << " ";
+}//end of the paint function
+
+unsigned long getlen()//get size of file in bytes
+{
+    unsigned long len = 0;
+    if (file != NULL)
+    {
+        fseek(file, 0, SEEK_SET);
+        while (fgetc(file) != EOF) len++;
+    }
+    return len;
+}
+
+void closefile()
+{
+    if (file != NULL) fclose(file);
+    sprintf_s(cfilename, "no file");
+    file = NULL;
+}
+
+
+int main(void)
+{
+    offset = 0;//in nibbles of 16 bytes
+    pointer = 0;//in multiples of 16
+    size1 = 0;//opened file zie
+    int i=0, x=0, y=0;
+    char fname[256];//temp store of user input filename to open
+    update = 1;//do we update screen? who knows its a mystery
+
+    showcursor(false);
+    sprintf_s(cfilename, "nofile");
+    print();
+
+    while (!done)//display loop
+    {
+        //if (update == 1)//refresh screen
+        //{
+        //    update = 0;
+        //    print();
+        //}
+        key = _getch();//get keyboard input
+
+        if (key == VK_ESCAPE) done = 1;//exit program
+
+        if (key == 59)//F1 load file
+        {
+            clrscr();
+            textcolor(12);
+            gotoxy(1, 25);
+            _cprintf("Open file > ");
+            cin >> fname;
+
+            sprintf_s(cfilename, fname);
+            fopen_s(&file, cfilename, "rb+");
+            size1 = getlen();
+            print();
+        }
+
+        if (key == 77) //Right Arrow 
+        {
+            print();
+            x++;
+            gotoxy(x, y);
+            textcolor(208);
+            cout << " ";
+        }
+        if (key == 75) //Left Arrow 
+        {
+            print();
+            x--;
+            gotoxy(x, y);
+            textcolor(208);
+            cout << " ";
+        }
+        if (key == 72) //Up Arrow 
+        {
+            print();
+            y--;
+            gotoxy(x, y);
+            textcolor(208);
+            cout << " ";
+        }
+        if (key == 80) //Down Arrow 
+        {
+            print();
+            y++;
+            gotoxy(x, y);
+            textcolor(208);
+            cout << " ";
+        }
+
+
+        textcolor(14);
+        gotoxy(1, 26);
+        _cprintf("%d", key);
+
+    }
+    textcolor(15);
+    clrscr();
+    return 0;
+}//end of main
+
+void textcolor(int c)
+{
+    HANDLE  hConsole;
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, c);
+}
+
+void gotoxy(int x, int y)         //define gotoxy function
+{
+    static HANDLE hStdout = NULL;
+    COORD coord;
+
+    coord.X = x;
+    coord.Y = y;
+    if (!hStdout) { hStdout = GetStdHandle(STD_OUTPUT_HANDLE); }
+    SetConsoleCursorPosition(hStdout, coord);
+}
+
+void clrscr(void)
+{
+    static HANDLE hStdout = NULL;
+    static CONSOLE_SCREEN_BUFFER_INFO csbi;
+    const COORD startCoords = { 0,0 };
+    DWORD dummy;
+    textcolor(10);
+
+    if (!hStdout)
+    {
+        hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+        GetConsoleScreenBufferInfo(hStdout, &csbi);
+    }
+    FillConsoleOutputCharacter(hStdout, ' ', csbi.dwSize.X * csbi.dwSize.Y, startCoords, &dummy);
+    gotoxy(0, 0);
+    //Clear screen after images from moving cursor
+    for (y = 0; y < 32; y++)
+    {
+        for (x = 0; x < 82; x++)
+        {
+            gotoxy(x, y);
+            textcolor(10);
+            cout << " ";
+        }
+    }
+    gotoxy(0, 0);
+}
+
+void showcursor(bool showFlag)
+{
+    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    CONSOLE_CURSOR_INFO     cursorInfo;
+
+    GetConsoleCursorInfo(out, &cursorInfo);
+    cursorInfo.bVisible = showFlag;// set the cursor visibility
+    SetConsoleCursorInfo(out, &cursorInfo);
+}
